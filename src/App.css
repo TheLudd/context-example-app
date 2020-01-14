@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.todo-item-name {
+  padding: 4rem;
+
+}
+
+.todo-item-name.is-done {
+  text-decoration: line-through;
+}
