@@ -47,10 +47,10 @@ function TodoItem (props) {
   })
 
   return (
-    <div className="todo-item">
+    <div className="todo">
       <label>
-        <span className={ `todo-item-name ${statusClass}` }>{ todo.name }</span>
         <input type="checkbox" checked={ done } onChange={ () => onStatusChange(todo) } />
+        <span className={ `todo-name ${statusClass}` }>{ todo.name }</span>
       </label>
     </div>
   )
@@ -75,15 +75,17 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <form onSubmit={ handleSubmit } >
+    <div className="content">
+      <form onSubmit={ handleSubmit } className="todo-form" >
+        <label>Add a Todo</label>
         <input
           type="text"
           value={ name }
           onChange={ (e) => setName(e.target.value) }
         />
+        <button type="submit">+ Add</button>
       </form>
-      <div className="App-header">
+      <div className="todos">
         { map(createTodoItem(changeStatus), todos) }
       </div>
     </div>
