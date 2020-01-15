@@ -1,8 +1,8 @@
-import { isEmpty, append, merge, lensProp, over, curry, compose, map, identical, assoc, identity, filter, propEq } from 'ramda'
+import { append, merge, lensProp, over, curry, compose, map, identical, assoc } from 'ramda'
 
 const initialState = {
   todos: [],
-  filterFn: identity,
+  filters: {},
   isLoading: false,
   isCreating: false,
 }
@@ -13,10 +13,6 @@ const updateByEntity = curry((partialEntity, list) => map((entity) => {
     : entity
 }, list))
 
-const createFilterFnFromPayload = (filters) => {
-  return identity
-}
-
 const todosReducer = (state = initialState, action) => {
   switch(action.type) {
     case 'FETCH_TODOS':
@@ -26,7 +22,7 @@ const todosReducer = (state = initialState, action) => {
     case 'UPDATE_TODO':
       return over(lensProp('todos'), updateByEntity({ id: action.payload.id, isLoading: true }), state)
     case 'FILTER_TODOS':
-      return assoc('filterFn', createFilterFnFromPayload(action.payload), state)
+      return assoc('filters', action.payload, state)
     case 'TODOS_FETCHED':
       return compose(assoc('isLoading', false), assoc('todos', action.payload))(state)
     case 'TODO_CREATED':

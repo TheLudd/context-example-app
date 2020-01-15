@@ -102,6 +102,15 @@
   width: initial;
 }
 
+.filter-clear {
+  font-size: .8rem;
+  font-weight: normal;
+  color: red;
+
+  margin-left: .5rem;
+  cursor: pointer;
+}
+
 /* LOADER */
 .loader {
   display: inline-block;

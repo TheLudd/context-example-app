@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { map, isEmpty, isNil } from 'ramda'
+import { map, curry, isNil, identical, filter, both, test } from 'ramda'
 import { useSelector, useDispatch } from 'react-redux'
 import './App.css'
 
 const noop = () => {}
+
+const filterOnStatus = curry((filterVal, item) => isNil(filterVal) || filterVal === item.completed)
+const filterOnName = curry((filterVal, item) => identical(filterVal, '') || test(new RegExp(filterVal, 'i'), item.name))
+
+const filterTodos = (filters, todos) => {
+  const { name, completed } = filters
+  return filter(both(filterOnStatus(completed), filterOnName(name)), todos)
+}
 
 function TodoItem (props) {
   const { todo, setCompleted } = props
@@ -25,10 +33,14 @@ function TodoItem (props) {
 
 function App() {
   const dispatch = useDispatch()
-  const { todos: pureTodos, filterFn, isLoading, isCreating } = useSelector(store => store.todosState)
+  const { todos: pureTodos, filters, isLoading, isCreating } = useSelector(store => store.todosState)
   const [ name, setName ] = useState('')
+  const [ completedFilter, setCompletedFilter ] = useState(isNil(filters.completed) ? 'all' : filters.completed)
+  const [ nameFilter, setNameFilter ] = useState('')
 
-  const todos = filterFn(pureTodos)
+  const todos = filterTodos(filters, pureTodos)
+
+  const hasFilters = (filters.name && filters.name.length > 0) || !isNil(filters.completed)
 
   useEffect(() => {
     dispatch({ type: 'FETCH_TODOS', meta: 'COMMAND', payload: null })
@@ -42,7 +54,17 @@ function App() {
 
   const handleFilterTodos = (e) => {
     e.preventDefault()
-    dispatch({ type: 'FILTER_TODOS', meta: 'COMMAND', payload: { name: 'hello' } })
+    const payload = {
+      name: nameFilter,
+      completed: completedFilter === 'all' ? undefined : completedFilter
+    }
+    dispatch({ type: 'FILTER_TODOS', meta: 'COMMAND', payload })
+  }
+
+  const handleClearFilters = () => {
+    dispatch({ type: 'FILTER_TODOS', meta: 'COMMAND', payload: {} })
+    setCompletedFilter('all')
+    setNameFilter('')
   }
 
   const setCompleted = (id, completed) => dispatch({ type: 'UPDATE_TODO', meta: 'COMMAND', payload: { id, completed } })
@@ -62,26 +84,33 @@ function App() {
         </button>
       </form>
       <form onSubmit={ handleFilterTodos } className="todo-form">
-        <label>FILTERS</label>
+        <label>
+          FILTERS
+            { hasFilters &&
+              <span className="filter-clear" onClick={ handleClearFilters }>X Clear</span>
+            }
+        </label>
         <input
           type="text"
           name="name"
+          value={ nameFilter }
+          onChange={ (e) => setNameFilter(e.target.value) }
           disabled={ isLoading }
         />
         <button type="submit" disabled={ isLoading }>
           { isLoading ? '...' : '- Filter' }
         </button>
-        <div className="filter-complete">
+        <div className="filter-complete" onChange={ (e) => setCompletedFilter(e.target.value === 'all' ? 'all' : JSON.parse(e.target.value)) }>
           <label>
-            <input type="radio" name="completed" value={ 'all' } onChange={ noop } />
+            <input type="radio" name="completed" value={ 'all' } checked={ completedFilter === 'all' } onChange={ noop } />
             All
           </label>
           <label>
-            <input type="radio" name="completed" value={ true } onChange={ noop } />
+            <input type="radio" name="completed" value={ true } checked={ completedFilter === true } onChange={ noop } />
             Completed
           </label>
           <label>
-            <input type="radio" name="completed" value={ false } onChange={ noop } />
+            <input type="radio" name="completed" value={ false } checked={ completedFilter === false } onChange={ noop } />
             To do
           </label>
         </div>
