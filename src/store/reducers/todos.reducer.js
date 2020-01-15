@@ -10,7 +10,7 @@ function createFunctionalSlice (conf) {
 
 const initialState = {
   todos: [],
-  filters: {},
+  filters: { name: '' },
   isLoading: false,
   isCreating: false,
 }
