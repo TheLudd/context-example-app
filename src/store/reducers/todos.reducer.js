@@ -1,4 +1,12 @@
-import { append, merge, lensProp, over, curry, compose, map, identical, assoc } from 'ramda'
+import { K, compose } from 'yafu'
+import { append, merge, lensProp, over, curry, map, identical, assoc } from 'ramda'
+
+import { createSlice } from '@reduxjs/toolkit'
+
+function createFunctionalSlice (conf) {
+  const modifiedConf = overReducers(map((fn) => (state, action) => fn(action.payload, state)), conf)
+  return createSlice(modifiedConf)
+}
 
 const initialState = {
   todos: [],
@@ -13,25 +21,23 @@ const updateByEntity = curry((partialEntity, list) => map((entity) => {
     : entity
 }, list))
 
-const todosReducer = (state = initialState, action) => {
-  switch(action.type) {
-    case 'FETCH_TODOS':
-      return assoc('isLoading', true, state)
-    case 'CREATE_TODO':
-      return assoc('isCreating', true, state)
-    case 'UPDATE_TODO':
-      return over(lensProp('todos'), updateByEntity({ id: action.payload.id, isLoading: true }), state)
-    case 'FILTER_TODOS':
-      return assoc('filters', action.payload, state)
-    case 'TODOS_FETCHED':
-      return compose(assoc('isLoading', false), assoc('todos', action.payload))(state)
-    case 'TODO_CREATED':
-      return assoc('isCreating', false, over(lensProp('todos'), append(action.payload), state))
-    case 'TODO_UPDATED':
-      return over(lensProp('todos'), updateByEntity(action.payload), state)
-    default:
-      return state
+const overReducers = over(lensProp('reducers'))
+const overTodos = over(lensProp('todos'))
+
+const sliceConf = {
+  initialState,
+  name: 'todos',
+  reducers: {
+    fetchTodos: K(assoc('isLoading', true)),
+    createTodo: K(assoc('isCreating', true)),
+    todosFetched: (todos, state) => merge(state, { todos, isLoading: false }),
+    filterTodos: assoc('filters'),
+    todoCreated: (todo, state) => assoc('isCreating', false, over(lensProp('todos'), append(todo), state)),
+    updateTodo: (update, state) => overTodos(updateByEntity({ id: update.id, isLoading: true }), state),
+    todoUpdated: compose(overTodos, updateByEntity),
   }
 }
 
-export default todosReducer
+const { reducer, actions } = createFunctionalSlice(sliceConf)
+
+export { reducer, actions }

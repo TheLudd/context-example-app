@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { map, curry, isNil, identical, filter, both, test } from 'ramda'
 import { useSelector, useDispatch } from 'react-redux'
+import { actions } from './store/reducers/todos.reducer'
 import './App.css'
 
 const noop = () => {}
@@ -43,13 +44,14 @@ function App() {
   const hasFilters = (filters.name && filters.name.length > 0) || !isNil(filters.completed)
 
   useEffect(() => {
-    dispatch({ type: 'FETCH_TODOS', meta: 'COMMAND', payload: null })
+    dispatch(actions.fetchTodos())
     return () => null
   }, [dispatch])
 
   const handleSubmitTodo = (e) => {
     e.preventDefault()
-    dispatch({ type: 'CREATE_TODO', meta: 'COMMAND', payload: { name } })
+    const todo = { name }
+    dispatch(actions.createTodo(todo))
   }
 
   const handleFilterTodos = (e) => {
@@ -58,16 +60,16 @@ function App() {
       name: nameFilter,
       completed: completedFilter === 'all' ? undefined : completedFilter
     }
-    dispatch({ type: 'FILTER_TODOS', meta: 'COMMAND', payload })
+    dispatch(actions.filterTodos(payload))
   }
 
   const handleClearFilters = () => {
-    dispatch({ type: 'FILTER_TODOS', meta: 'COMMAND', payload: {} })
+    dispatch(actions.filterTodos({}))
     setCompletedFilter('all')
     setNameFilter('')
   }
 
-  const setCompleted = (id, completed) => dispatch({ type: 'UPDATE_TODO', meta: 'COMMAND', payload: { id, completed } })
+  const setCompleted = (id, completed) => dispatch(actions.updateTodo({ id, completed }))
 
   return (
     <div className="content">
