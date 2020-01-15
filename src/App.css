@@ -1,8 +1,11 @@
 .content {
+  display: flex;
   width: 50rem;
   position: absolute;
   top: 50%;
   left: 50%;
+
+  flex-wrap: wrap;
 
   transform: translate(-50%, -50%);
 }
@@ -33,25 +36,95 @@
 }
 
 .todo-form {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid gray;
+  width: 50%;
+  border: 1px solid gray;
+
+  box-sizing: border-box;
 
   text-align: center;
+  padding: 1rem 0;
+}
+
+.todos-loading-options {
+  width: 50%;
+
+  border-bottom: 1px solid gray;
+  text-align: center;
+  padding-bottom: 1rem;
+}
+
+.todos-loading-options span {
+  display: block;
+  margin-bottom: .5rem;
 }
 
 .todos {
+  width: 100%;
   margin-top: 1rem;
   display: flex;
   flex-wrap: wrap;
 }
 
 .todo {
+  position: relative;
   width: 100%;
   padding: 1rem .5rem;
   margin-top: .1rem;
   border: 1px solid gray;
+  text-align: center;
 }
 
-.todo input {
-  margin-right: 1rem;
+.todo-completed {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  cursor: pointer;
+}
+
+.filter-complete {
+  display: flex;
+  justify-content: center;
+
+  margin-top: 1rem;
+}
+
+.filter-complete label {
+  text-align: center;
+  font-size: .8rem;
+  font-weight: normal;
+}
+
+.filter-complete input {
+  display: inline-block;
+  width: initial;
+}
+
+/* LOADER */
+.loader {
+  display: inline-block;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.loader:after {
+  content: " ";
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #2a9df5;
+  border-color: #2a9df5 transparent #2a9df5 transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
